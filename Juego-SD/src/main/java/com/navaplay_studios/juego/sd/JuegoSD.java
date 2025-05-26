@@ -11,6 +11,8 @@ package com.navaplay_studios.juego.sd;
 public class JuegoSD {
 
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        PantallaPrincipal pantalla = new PantallaPrincipal();
+        pantalla.setVisible(true);
+        pantalla.setLocationRelativeTo(null);
     }
 }
