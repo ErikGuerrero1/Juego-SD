@@ -9,9 +9,9 @@ package com.navaplay_studios.juego.sd;
  * @author alber
  */
 public class PantallaCliente extends javax.swing.JFrame {
-    
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(PantallaCliente.class.getName());
 
+    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(PantallaCliente.class.getName());
+    private Cliente cliente;
     /**
      * Creates new form PantallaCliente
      */
@@ -34,8 +34,10 @@ public class PantallaCliente extends javax.swing.JFrame {
         ButtonRock = new javax.swing.JButton();
         ButtonPaper = new javax.swing.JButton();
         ButtonScissors = new javax.swing.JButton();
-        jTextField1 = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
+        jLabel4 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         jTextField2 = new javax.swing.JTextField();
@@ -56,7 +58,7 @@ public class PantallaCliente extends javax.swing.JFrame {
         jLabel1.setFont(new java.awt.Font("Segoe UI", 3, 18)); // NOI18N
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("Cliente");
-        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 10, 90, -1));
+        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 10, 90, -1));
 
         ButtonClose.setText("Cerrar conexiones");
         ButtonClose.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
@@ -78,6 +80,11 @@ public class PantallaCliente extends javax.swing.JFrame {
 
         ButtonPaper.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/papel.png"))); // NOI18N
         ButtonPaper.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        ButtonPaper.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ButtonPaperActionPerformed(evt);
+            }
+        });
         jPanel1.add(ButtonPaper, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 250, -1, -1));
 
         ButtonScissors.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/tijera.png"))); // NOI18N
@@ -89,13 +96,17 @@ public class PantallaCliente extends javax.swing.JFrame {
         });
         jPanel1.add(ButtonScissors, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 250, -1, -1));
 
-        jTextField1.setEditable(false);
-        jTextField1.setBackground(new java.awt.Color(255, 255, 255));
-        jTextField1.setHorizontalAlignment(javax.swing.JTextField.LEFT);
-        jPanel1.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 50, 388, 176));
-
         jLabel3.setFont(new java.awt.Font("Segoe UI", 2, 12)); // NOI18N
         jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 350, 240, 20));
+
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jScrollPane1.setViewportView(jTextArea1);
+
+        jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 50, 390, 180));
+
+        jLabel4.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
+        jPanel1.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 10, 260, 30));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 520, 400));
 
@@ -149,7 +160,9 @@ public class PantallaCliente extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void ButtonCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ButtonCloseActionPerformed
-        // TODO add your handling code here:
+        if (cliente != null) {
+            cliente.cerrarConexion();
+        }
         PantallaPrincipal pantalla = new PantallaPrincipal();
         pantalla.setVisible(true);
         pantalla.setLocationRelativeTo(null);
@@ -157,7 +170,10 @@ public class PantallaCliente extends javax.swing.JFrame {
     }//GEN-LAST:event_ButtonCloseActionPerformed
 
     private void ButtonRockActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ButtonRockActionPerformed
-        // TODO add your handling code here:
+        //Funcionalidad para el boton de piedra
+        if (cliente != null && cliente.estaConectado()) {
+            cliente.enviarJugada("R");
+        }
     }//GEN-LAST:event_ButtonRockActionPerformed
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
@@ -165,7 +181,10 @@ public class PantallaCliente extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowOpened
 
     private void ButtonScissorsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ButtonScissorsActionPerformed
-        // TODO add your handling code here:
+        //Funcionalidad para el boton de tijera
+        if (cliente != null && cliente.estaConectado()) {
+            cliente.enviarJugada("T");
+        }
     }//GEN-LAST:event_ButtonScissorsActionPerformed
 
     private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
@@ -173,11 +192,49 @@ public class PantallaCliente extends javax.swing.JFrame {
     }//GEN-LAST:event_jTextField2ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        jPanel2.setVisible(false);
-        jPanel1.setVisible(true);
         String textoIngresado = jTextField2.getText();
-        jLabel3.setText("Conexión con el servidor: "+textoIngresado);
+
+        // Crear cliente con callbacks
+        cliente = new Cliente(
+                textoIngresado,
+                // Callback para mensajes
+                mensaje -> {
+                    javax.swing.SwingUtilities.invokeLater(() -> {
+                        jTextArea1.append(mensaje + "\n");
+                        jTextArea1.setCaretPosition(jTextArea1.getDocument().getLength());
+                    });
+                    if(mensaje.contains("Conectado como Jugador 1. Esperando segundo jugador...") && jLabel4!=null)
+                        jLabel4.setText("Tu eres Jugador 1");
+                    if(mensaje.contains("Conectado como Jugador 2. ¡El juego puede comenzar!") && jLabel4!=null)
+                        jLabel4.setText("Tu eres Jugador 2");
+                },
+                // Callback para habilitar/deshabilitar botones
+                habilitar -> {
+                    javax.swing.SwingUtilities.invokeLater(() -> {
+                        ButtonRock.setEnabled(habilitar);
+                        ButtonPaper.setEnabled(habilitar);
+                        ButtonScissors.setEnabled(habilitar);
+                    });
+                }
+        );
+
+        if (cliente.conectarServidor()) {
+            jPanel2.setVisible(false);
+            jPanel1.setVisible(true);
+            jLabel3.setText("Conexión con el servidor: " + textoIngresado);
+            // Los botones se habilitarán automáticamente cuando el servidor lo indique
+            ButtonRock.setEnabled(false);
+            ButtonPaper.setEnabled(false);
+            ButtonScissors.setEnabled(false);
+        }
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void ButtonPaperActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ButtonPaperActionPerformed
+        //Funcionalidad para el boton de papel
+        if (cliente != null && cliente.estaConectado()) {
+            cliente.enviarJugada("P");
+        }
+    }//GEN-LAST:event_ButtonPaperActionPerformed
 
     /**
      * @param args the command line arguments
@@ -213,9 +270,15 @@ public class PantallaCliente extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextField jTextField2;
     // End of variables declaration//GEN-END:variables
+
+    void habilitarBotones(boolean b) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
 }
