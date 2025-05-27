@@ -11,82 +11,71 @@ import java.net.*;
  *
  * @author ferga
  */
-public class Servidor {
-    
-    private ServerSocket servidor;
-    private ObjectOutputStream salida1, salida2;
-    private ObjectInputStream entrada1, entrada2;
-    private Socket cliente1, cliente2;
-    
-    public Servidor() {
+class ConexionCliente extends Thread {
+
+    private ObjectOutputStream salida;
+    private ObjectInputStream entrada;
+    private Socket cliente;
+
+    public ConexionCliente(Socket cliente) throws IOException {
+        this.cliente = cliente;
+        this.salida = new ObjectOutputStream(this.cliente.getOutputStream());
+        this.entrada = new ObjectInputStream(this.cliente.getInputStream());
     }
-    
+
+    public void cerrarConexion() throws IOException {
+        salida.close();
+        entrada.close();
+        cliente.close();
+    }
+
+    public void enviarDatos(String mensaje) throws IOException {
+        salida.writeObject("SERVIDOR: " + mensaje);
+    }
+}
+
+public class Servidor {
+
+    private ServerSocket servidor;
+    private Socket socket1, socket2;
+    private ConexionCliente cliente1, cliente2;
+
     public void ejecutarServidor() {
         try {
             servidor = new ServerSocket(11000);
             while (true) {
-//                try {
-//                    esperarConexion(1);
-//                    esperarConexion(2);
-//                    obtenerFlujos(1);
-//                    obtenerFlujos(2);
-//                    procesarConexion();
-//                } catch (EOFException excepcionEOF) {
-//                    System.err.println("El servidor terminó la conexión.");
-//                } finally {
-//                    cerrarConexion();
-//                }
+                try {
+                    esperarConexion(socket1);
+                    cliente1 = new ConexionCliente(socket1);
+                    cliente1.enviarDatos("Esperando segundo jugador...");
+                    esperarConexion(socket2);
+                    cliente2 = new ConexionCliente(socket2);
+                    procesarConexiones();
+                } catch (EOFException excepcionEOF) {
+                    System.err.println("El servidor terminó la conexión.");
+                } finally {
+                    cerrarConexiones();
+                }
             }
         } catch (IOException excepcionES) {
             excepcionES.printStackTrace();
         }
     }
-    
-    private void esperarConexion(int numCliente) throws IOException {
-        if (numCliente == 1) {
-            cliente1 = servidor.accept();
-        } else if (numCliente == 2) {
-            cliente2 = servidor.accept();
-        }
+
+    private void esperarConexion(Socket c) throws IOException {
+        c = servidor.accept();
     }
-    
-    private void obtenerFlujos(int numCliente) throws IOException {
-        if (numCliente == 1) {
-            salida1 = new ObjectOutputStream(cliente1.getOutputStream());
-            entrada1 = new ObjectInputStream(cliente1.getInputStream());
-        } else if (numCliente == 2) {
-            salida2 = new ObjectOutputStream(cliente2.getOutputStream());
-            entrada2 = new ObjectInputStream(cliente2.getInputStream());
-        }
+
+    private void procesarConexiones() {
+
     }
-    
-    private void procesarConexiones() throws IOException {
-        String mensaje = "Conexiones exitosas.";
-//        do {
-//            
-//        } while ()
-    }
-    
+
     private void cerrarConexiones() {
         try {
-            salida1.close();
-            salida2.close();
-            entrada1.close();
-            entrada2.close();
-            cliente1.close();
-            cliente2.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    private void enviarDatos(String mensaje, int numCliente) {
-        try {
-            if (numCliente == 1) {
-                salida1.writeObject("SERVIDOR: " + mensaje);
-            } else if (numCliente == 2) {
-                salida2.writeObject("SERVIDOR: " + mensaje);
-            }
+            cliente1.cerrarConexion();
+            cliente2.cerrarConexion();
+            socket1.close();
+            socket2.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
