@@ -101,7 +101,11 @@ public class PantallaPrincipal extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void ButtonServerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ButtonServerActionPerformed
-
+        System.out.println("Boton Servidor");
+        PantallaServidor pantalla = new PantallaServidor();
+        pantalla.setVisible(true);
+        pantalla.setLocationRelativeTo(null);
+        this.setVisible(false);
     }//GEN-LAST:event_ButtonServerActionPerformed
 
     private void ButtonClientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ButtonClientActionPerformed
